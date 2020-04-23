@@ -6,7 +6,14 @@ import api from "./services/api";
 function App() {
   const [repositories, setRepositories] = useState([]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    async function loadResp() {
+      const response = await api.get("repositories");
+      setRepositories(response.data);
+    }
+    loadResp();
+  }, []);
+
   async function handleAddRepository() {
     const resp = await api.post("repositories", {
       title: "Titulo",
@@ -14,13 +21,13 @@ function App() {
       techs: ["nodejs", "reactjs"],
     });
 
-    setRepositories([...repositories, response.data]);
+    setRepositories([...repositories, resp.data]);
   }
 
   async function handleRemoveRepository(id) {
     await api.delete(`repositories/${id}`);
-
-    setRepositories(repositories.filter(repository.id !== id));
+    const repository = repositories.filter((r) => r.id !== id);
+    setRepositories(repository);
   }
 
   return (
@@ -29,7 +36,9 @@ function App() {
         {repositories.map((repository) => (
           <li key={repository.id}>
             {repository.title}
-            <button onClick={() => handleRemoveRepository(1)}>Remover</button>
+            <button onClick={() => handleRemoveRepository(repository.id)}>
+              Remover
+            </button>
           </li>
         ))}
       </ul>
